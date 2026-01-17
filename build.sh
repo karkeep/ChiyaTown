@@ -5,6 +5,9 @@ echo "--------------------------------------"
 echo "🚀 Starting Chiya Town Build Script"
 echo "--------------------------------------"
 
+# Fix Git ownership issues on Vercel (runs as root with different user ownership)
+git config --global --add safe.directory '*'
+
 # 1. Install Flutter 3.22.0 (known stable version with --web-renderer support)
 FLUTTER_VERSION="3.22.0"
 
@@ -21,9 +24,10 @@ fi
 # 2. Add to PATH
 export PATH="$PATH:$(pwd)/_flutter/bin"
 
-# 3. Disable analytics and doctor checks for faster builds
+# 3. Disable analytics and suppress root warning
 flutter config --no-analytics
 export FLUTTER_SUPPRESS_ANALYTICS=true
+export PUB_CACHE="$(pwd)/.pub-cache"
 
 # 4. Print Version
 echo "ℹ️  Flutter Version:"
