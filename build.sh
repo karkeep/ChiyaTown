@@ -5,18 +5,19 @@ echo "--------------------------------------"
 echo "🚀 Starting Chiya Town Build Script"
 echo "--------------------------------------"
 
-# 1. Install Flutter (Pinning to 3.24.0 to ensure build stability)
+# 1. Install/Update Flutter to 3.24.0
 if [ ! -d "_flutter" ]; then
     echo "📦 Flutter not found. Installing 3.24.0..."
     git clone https://github.com/flutter/flutter.git _flutter
-    cd _flutter
-    git checkout 3.24.0
-    cd ..
 else
-    echo "✅ Flutter folder exists."
-    # Optional: Force checkout if you want to ensure version
-    # cd _flutter && git checkout 3.24.0 && cd ..
+    echo "✅ Flutter folder exists. Switching to 3.24.0..."
 fi
+
+# Force the correct version
+cd _flutter
+git fetch --tags
+git checkout 3.24.0
+cd ..
 
 # 2. Add to PATH
 export PATH="$PATH:$(pwd)/_flutter/bin"
