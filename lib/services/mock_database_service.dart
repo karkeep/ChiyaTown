@@ -1,7 +1,6 @@
 import 'dart:async';
 import '../models/order.dart';
 import '../models/table_model.dart';
-import '../data/menu_data.dart';
 
 class MockDatabaseService {
   static final MockDatabaseService _instance = MockDatabaseService._internal();
@@ -31,7 +30,7 @@ class MockDatabaseService {
 
   void placeOrder(Order order) {
     _orders.add(order);
-    
+
     // Update table status
     int index = _tables.indexWhere((t) => t.id == order.tableId);
     if (index != -1) {
@@ -42,7 +41,7 @@ class MockDatabaseService {
         isOccupied: true,
       );
     }
-    
+
     _notifyOrders();
     _notifyTables();
   }
@@ -63,13 +62,13 @@ class MockDatabaseService {
   }
 
   void freeTable(String tableId) {
-     int index = _tables.indexWhere((t) => t.id == tableId);
+    int index = _tables.indexWhere((t) => t.id == tableId);
     if (index != -1) {
       _tables[index] = CafeTable(
         id: _tables[index].id,
         name: _tables[index].name,
         capacity: _tables[index].capacity,
-        isOccupied: false, 
+        isOccupied: false,
       );
       _notifyTables();
     }
@@ -82,6 +81,6 @@ class MockDatabaseService {
   void _notifyTables() {
     _tablesController.add(List.from(_tables));
   }
-  
+
   List<Order> get currentOrders => List.from(_orders);
 }

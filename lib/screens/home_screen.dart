@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'customer/customer_landing_screen.dart';
 import 'kitchen/kitchen_monitor_screen.dart';
 import 'counter/counter_dashboard_screen.dart';
@@ -48,19 +47,28 @@ class HomeScreen extends StatelessWidget {
                     title: 'Customer',
                     icon: Icons.qr_code_scanner,
                     color: Colors.orange,
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CustomerLandingScreen())),
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const CustomerLandingScreen())),
                   ),
                   _RoleCard(
                     title: 'Kitchen',
                     icon: Icons.kitchen,
                     color: Colors.green,
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KitchenMonitorScreen())),
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const KitchenMonitorScreen())),
                   ),
                   _RoleCard(
                     title: 'Counter',
                     icon: Icons.point_of_sale,
                     color: Colors.blue,
-                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CounterDashboardScreen())),
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const CounterDashboardScreen())),
                   ),
                 ],
               ),
@@ -78,7 +86,11 @@ class _RoleCard extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _RoleCard({required this.title, required this.icon, required this.color, required this.onTap});
+  const _RoleCard(
+      {required this.title,
+      required this.icon,
+      required this.color,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {

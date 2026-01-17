@@ -9,10 +9,13 @@ import 'screens/customer/customer_menu_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Use Environment Variables if available, otherwise fallback to hardcoded (for local dev)
-  const supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://wbyodrisfdnsczknuupz.supabase.co');
-  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndieW9kcmlzZmRuc2N6a251dXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjA4MjEsImV4cCI6MjA4NDE5NjgyMX0.stZpO42GsZXCTjNAIy423mzOafrvqm15AtEzTWaBZ0Q');
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL',
+      defaultValue: 'https://wbyodrisfdnsczknuupz.supabase.co');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY',
+      defaultValue:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndieW9kcmlzZmRuc2N6a251dXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjA4MjEsImV4cCI6MjA4NDE5NjgyMX0.stZpO42GsZXCTjNAIy423mzOafrvqm15AtEzTWaBZ0Q');
 
   try {
     await Supabase.initialize(
@@ -20,14 +23,15 @@ Future<void> main() async {
       anonKey: supabaseAnonKey,
     );
     runApp(const ChiyaTownApp());
-  } catch (e, stack) {
+  } catch (e) {
     debugPrint('Startup Error: $e');
     runApp(MaterialApp(
       home: Scaffold(
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Text('Startup Error:\n$e', style: const TextStyle(color: Colors.red)),
+            child: Text('Startup Error:\n$e',
+                style: const TextStyle(color: Colors.red)),
           ),
         ),
       ),
@@ -84,13 +88,13 @@ class _AppEntryPointState extends State<AppEntryPoint> {
         if (tableId != null) {
           debugPrint('Deep Link detected for table: $tableId');
           final provider = Provider.of<AppProvider>(context, listen: false);
-          
+
           // Verify table exists (simple check)
           if (provider.allTables.any((t) => t.id == tableId)) {
-             provider.selectTable(tableId);
-             Navigator.of(context).pushReplacement(
-               MaterialPageRoute(builder: (_) => const CustomerMenuScreen()),
-             );
+            provider.selectTable(tableId);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const CustomerMenuScreen()),
+            );
           }
         }
       }
