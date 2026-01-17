@@ -59,6 +59,7 @@ class SupabaseService {
                   name: json['name'],
                   capacity: json['capacity'],
                   isOccupied: json['is_occupied'] ?? false,
+                  sessionId: json['session_id'],
                 ))
             .toList());
   }
