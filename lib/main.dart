@@ -6,6 +6,7 @@ import 'screens/home_screen.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import 'screens/customer/customer_menu_screen.dart';
+import 'screens/customer/customer_landing_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,20 +84,36 @@ class _AppEntryPointState extends State<AppEntryPoint> {
     // Check for URL parameters (Web Support)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final uri = Uri.base;
+      final provider = Provider.of<AppProvider>(context, listen: false);
+
+      // Check if coming from customer QR code with table ID
       if (uri.queryParameters.containsKey('table')) {
         final tableId = uri.queryParameters['table'];
         if (tableId != null) {
           debugPrint('Deep Link detected for table: $tableId');
-          final provider = Provider.of<AppProvider>(context, listen: false);
-
-          // Verify table exists (simple check)
-          if (provider.allTables.any((t) => t.id == tableId)) {
-            provider.selectTable(tableId);
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const CustomerMenuScreen()),
-            );
-          }
+          // Wait for tables to load then navigate
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (provider.allTables.any((t) => t.id == tableId)) {
+              provider.selectTable(tableId);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const CustomerMenuScreen()),
+              );
+            } else {
+              // Table not found, go to customer landing
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                    builder: (_) => const CustomerLandingScreen()),
+              );
+            }
+          });
         }
+      }
+      // Check if customer mode (from QR code without table ID)
+      else if (uri.queryParameters.containsKey('mode') &&
+          uri.queryParameters['mode'] == 'customer') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const CustomerLandingScreen()),
+        );
       }
     });
   }
