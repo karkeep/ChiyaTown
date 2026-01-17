@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo "--------------------------------------"
 echo "🚀 Starting Chiya Town Build Script"
