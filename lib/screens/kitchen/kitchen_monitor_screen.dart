@@ -368,15 +368,25 @@ class _ItemRowWithControls extends StatelessWidget {
           child: const Text('Done', style: TextStyle(fontSize: 12)),
         );
       case ItemStatus.ready:
+        return ElevatedButton(
+          onPressed: () =>
+              provider.updateItemStatus(orderId, item.id, ItemStatus.served),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          child: const Text('Serve', style: TextStyle(fontSize: 12)),
+        );
+      case ItemStatus.served:
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.green.withAlpha(50),
+            color: Colors.blue.withAlpha(50),
             borderRadius: BorderRadius.circular(5),
           ),
-          child: const Text('✓ Ready',
+          child: const Text('✓ Served',
               style: TextStyle(
-                  color: Colors.green,
+                  color: Colors.blue,
                   fontWeight: FontWeight.bold,
                   fontSize: 12)),
         );
@@ -391,6 +401,8 @@ class _ItemRowWithControls extends StatelessWidget {
         return Colors.orange;
       case ItemStatus.ready:
         return Colors.green;
+      case ItemStatus.served:
+        return Colors.blue;
     }
   }
 
@@ -402,6 +414,8 @@ class _ItemRowWithControls extends StatelessWidget {
         return Icons.local_fire_department;
       case ItemStatus.ready:
         return Icons.check_circle;
+      case ItemStatus.served:
+        return Icons.delivery_dining;
     }
   }
 }

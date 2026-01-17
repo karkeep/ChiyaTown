@@ -3,7 +3,7 @@ import 'menu_item.dart';
 
 enum OrderStatus { pending, cooking, ready, served, paid }
 
-enum ItemStatus { pending, cooking, ready }
+enum ItemStatus { pending, cooking, ready, served }
 
 class OrderItem {
   final String id;
@@ -51,9 +51,14 @@ class Order {
 
   double get totalAmount => items.fold(0, (sum, item) => sum + item.total);
 
-  // Check if all items are ready
-  bool get allItemsReady =>
-      items.every((item) => item.itemStatus == ItemStatus.ready);
+  // Check if all items are at least ready (ready or served)
+  bool get allItemsReady => items.every((item) =>
+      item.itemStatus == ItemStatus.ready ||
+      item.itemStatus == ItemStatus.served);
+
+  // Check if all items are served
+  bool get allItemsServed =>
+      items.every((item) => item.itemStatus == ItemStatus.served);
 
   // Check if any item is cooking
   bool get anyItemCooking =>
