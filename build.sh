@@ -24,8 +24,9 @@ echo "⬇️  Installing Dependencies..."
 flutter pub get
 
 # 5. Build Web App
+# --web-renderer html: Fixes white screen on some Vercel deployments (CanvasKit issues)
 # --no-wasm-dry-run: Fixes mobile_scanner issue
 echo "MZ  Building Web App..."
-flutter build web --release --no-wasm-dry-run --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+flutter build web --release --web-renderer html --no-wasm-dry-run --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 
 echo "✅ Build Complete!"
