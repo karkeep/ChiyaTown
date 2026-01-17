@@ -14,12 +14,25 @@ Future<void> main() async {
   const supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://wbyodrisfdnsczknuupz.supabase.co');
   const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndieW9kcmlzZmRuc2N6a251dXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjA4MjEsImV4cCI6MjA4NDE5NjgyMX0.stZpO42GsZXCTjNAIy423mzOafrvqm15AtEzTWaBZ0Q');
 
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-  );
-
-  runApp(const ChiyaTownApp());
+  try {
+    await Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+    );
+    runApp(const ChiyaTownApp());
+  } catch (e, stack) {
+    debugPrint('Startup Error: $e');
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text('Startup Error:\n$e', style: const TextStyle(color: Colors.red)),
+          ),
+        ),
+      ),
+    ));
+  }
 }
 
 class ChiyaTownApp extends StatelessWidget {
