@@ -59,6 +59,7 @@ class SupabaseService {
                   name: json['name'],
                   capacity: json['capacity'],
                   isOccupied: json['is_occupied'] ?? false,
+                  isLocked: json['is_locked'] ?? false,
                   sessionId: json['session_id'],
                 ))
             .toList());
@@ -138,8 +139,41 @@ class SupabaseService {
   }
 
   Future<void> freeTable(String tableId) async {
+    // When clearing table, also lock it to prevent new orders until staff unlocks
     await _client
         .from('tables')
-        .update({'is_occupied': false}).eq('id', tableId);
+        .update({'is_occupied': false, 'is_locked': true}).eq('id', tableId);
+  }
+
+  Future<void> unlockTable(String tableId) async {
+    await _client
+        .from('tables')
+        .update({'is_locked': false, 'is_occupied': true}).eq('id', tableId);
+  }
+
+  Future<void> lockTable(String tableId) async {
+    await _client.from('tables').update({'is_locked': true}).eq('id', tableId);
+  }
+
+  // Remove an item from an order
+  Future<void> removeItemFromOrder(String orderId, String itemId) async {
+    try {
+      final response = await _client
+          .from('orders')
+          .select('items, total_amount')
+          .eq('id', orderId)
+          .single();
+
+      final List<dynamic> items = response['items'] ?? [];
+      final updatedItems =
+          items.where((item) => item['instanceId'] != itemId).toList();
+
+      // Recalculate total (we'll need to do this on the server ideally, but for now estimate)
+      await _client
+          .from('orders')
+          .update({'items': updatedItems}).eq('id', orderId);
+    } catch (e) {
+      print('Error removing item: $e');
+    }
   }
 }

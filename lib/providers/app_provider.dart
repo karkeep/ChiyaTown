@@ -62,7 +62,7 @@ class AppProvider with ChangeNotifier {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       tableId: _currentTableId!,
       items: List.from(_cart),
-      status: OrderStatus.pending,
+      status: OrderStatus.pending_approval, // Requires staff approval first
       timestamp: DateTime.now(),
     );
 
@@ -80,6 +80,18 @@ class AppProvider with ChangeNotifier {
 
   void markTableFree(String tableId) {
     _service.freeTable(tableId);
+  }
+
+  void unlockTable(String tableId) {
+    _service.unlockTable(tableId);
+  }
+
+  void lockTable(String tableId) {
+    _service.lockTable(tableId);
+  }
+
+  void removeItemFromOrder(String orderId, String itemId) {
+    _service.removeItemFromOrder(orderId, itemId);
   }
 
   // Helper for sales

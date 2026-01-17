@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
 import 'menu_item.dart';
 
-enum OrderStatus { pending, cooking, ready, served, paid }
+enum OrderStatus { pending_approval, pending, cooking, ready, served, paid }
 
 enum ItemStatus { pending, cooking, ready, served }
 
