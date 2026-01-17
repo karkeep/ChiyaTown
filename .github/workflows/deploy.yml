@@ -10,20 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.22.0'
           channel: 'stable'
+          cache: true
           
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build Web App
-        # Building with --wasm can sometimes be tricky on Vercel without proper headers, 
-        # so we stick to standard JS build for compatibility.
-        run: flutter build web --release --no-wasm
+        run: flutter build web --release --web-renderer html
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
@@ -31,5 +34,5 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
+          working-directory: ./build/web
           vercel-args: '--prod'
