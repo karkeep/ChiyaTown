@@ -25,9 +25,8 @@ echo "⬇️  Installing Dependencies..."
 flutter pub get
 
 # 5. Build Web App
-# --no-wasm-dry-run: Fixes mobile_scanner issue
-# --web-renderer removed because it causes Exit 64 on new Flutter versions
+# Simple build command. We handle renderer config in index.html now.
 echo "MZ  Building Web App..."
-flutter build web --release --no-wasm-dry-run --verbose --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+flutter build web --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
 echo "✅ Build Complete!"
