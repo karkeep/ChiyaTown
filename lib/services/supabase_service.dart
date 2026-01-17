@@ -37,7 +37,7 @@ class SupabaseService {
               status: OrderStatus.values.firstWhere(
                   (e) => e.name == json['status'],
                   orElse: () => OrderStatus.pending),
-              timestamp: DateTime.parse(json['timestamp']),
+              timestamp: DateTime.parse(json['timestamp']).toLocal(),
               items: items,
             );
           }).toList();
