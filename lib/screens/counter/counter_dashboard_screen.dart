@@ -15,6 +15,21 @@ class CounterDashboardScreen extends StatelessWidget {
         backgroundColor: Colors.brown.shade800,
         foregroundColor: Colors.white,
         actions: [
+          Consumer<AppProvider>(
+            builder: (context, provider, _) {
+              final unlockedCount =
+                  provider.allTables.where((t) => !t.isLocked).length;
+              return IconButton(
+                icon: Badge(
+                  label: Text('$unlockedCount'),
+                  isLabelVisible: unlockedCount > 0,
+                  child: const Icon(Icons.lock_open),
+                ),
+                tooltip: 'Lock All Tables',
+                onPressed: () => _showLockAllDialog(context, provider),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.bar_chart),
             tooltip: 'Sales Report',
@@ -185,6 +200,62 @@ class CounterDashboardScreen extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  void _showLockAllDialog(BuildContext context, AppProvider provider) {
+    final unlockedTables =
+        provider.allTables.where((t) => !t.isLocked).toList();
+
+    if (unlockedTables.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('All tables are already locked'),
+            backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4a),
+        title: const Row(
+          children: [
+            Icon(Icons.lock, color: Colors.red),
+            SizedBox(width: 10),
+            Text('Lock All Tables?', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: Text(
+          'This will lock ${unlockedTables.length} unlocked table(s).\n\nCustomers will not be able to place orders until you unlock individual tables.',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.lock),
+            label: const Text('Lock All Tables'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              for (var table in unlockedTables) {
+                provider.lockTable(table.id);
+              }
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      '${unlockedTables.length} table(s) locked. Business closed.'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
