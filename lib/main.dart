@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import 'screens/customer/customer_menu_screen.dart';
 import 'screens/customer/customer_landing_screen.dart';
+import 'screens/login_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -165,6 +166,7 @@ class _AppEntryPointState extends State<AppEntryPoint> {
 
   @override
   Widget build(BuildContext context) {
-    return const HomeScreen();
+    // Show login screen for staff access (no QR parameters)
+    return const LoginScreen();
   }
 }
