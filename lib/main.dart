@@ -12,8 +12,8 @@ Future<void> main() async {
   
   // TODO: Replace with your actual Supabase URL and Anon Key
   await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+    url: 'https://wbyodrisfdnsczknuupz.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndieW9kcmlzZmRuc2N6a251dXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjA4MjEsImV4cCI6MjA4NDE5NjgyMX0.stZpO42GsZXCTjNAIy423mzOafrvqm15AtEzTWaBZ0Q',
   );
 
   runApp(const ChiyaTownApp());
