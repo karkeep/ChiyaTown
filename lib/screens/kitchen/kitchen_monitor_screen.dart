@@ -18,7 +18,6 @@ class _KitchenMonitorScreenState extends State<KitchenMonitorScreen> {
   @override
   void initState() {
     super.initState();
-    // Update every second for elapsed time
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
@@ -41,7 +40,6 @@ class _KitchenMonitorScreenState extends State<KitchenMonitorScreen> {
       backgroundColor: const Color(0xFF1a1a2e),
       body: Consumer<AppProvider>(
         builder: (context, provider, child) {
-          // Get active orders (not paid/served)
           final activeOrders = provider.allOrders
               .where((o) =>
                   o.status != OrderStatus.paid &&
@@ -57,9 +55,6 @@ class _KitchenMonitorScreenState extends State<KitchenMonitorScreen> {
                   SizedBox(height: 20),
                   Text('No Active Orders',
                       style: TextStyle(fontSize: 24, color: Colors.white38)),
-                  SizedBox(height: 10),
-                  Text('Orders will appear here',
-                      style: TextStyle(color: Colors.white24)),
                 ],
               ),
             );
@@ -108,13 +103,11 @@ class _TableOrdersCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate total elapsed time from oldest order
     final oldestOrder =
         orders.reduce((a, b) => a.timestamp.isBefore(b.timestamp) ? a : b);
     final elapsed = DateTime.now().difference(oldestOrder.timestamp);
     final elapsedStr = _formatElapsed(elapsed);
 
-    // Determine urgency color based on elapsed time
     Color urgencyColor;
     if (elapsed.inMinutes < 10) {
       urgencyColor = Colors.green;
@@ -131,7 +124,6 @@ class _TableOrdersCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with table name and elapsed time
           Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
@@ -146,14 +138,11 @@ class _TableOrdersCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.table_restaurant, color: Colors.white),
                     const SizedBox(width: 10),
-                    Text(
-                      tableName,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                    Text(tableName,
+                        style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
                   ],
                 ),
                 Container(
@@ -168,22 +157,16 @@ class _TableOrdersCard extends StatelessWidget {
                     children: [
                       Icon(Icons.timer, color: urgencyColor, size: 18),
                       const SizedBox(width: 5),
-                      Text(
-                        elapsedStr,
-                        style: TextStyle(
-                          color: urgencyColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                      Text(elapsedStr,
+                          style: TextStyle(
+                              color: urgencyColor,
+                              fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-
-          // Orders list
           ...orders
               .map((order) => _OrderSection(order: order, provider: provider)),
         ],
@@ -192,10 +175,12 @@ class _TableOrdersCard extends StatelessWidget {
   }
 
   String _formatElapsed(Duration d) {
-    if (d.inMinutes < 60) {
-      return '${d.inMinutes}m ${d.inSeconds % 60}s';
+    final minutes = d.inMinutes.abs();
+    final seconds = (d.inSeconds.abs() % 60);
+    if (minutes < 60) {
+      return '${minutes}m ${seconds}s';
     }
-    return '${d.inHours}h ${d.inMinutes % 60}m';
+    return '${d.inHours.abs()}h ${minutes % 60}m';
   }
 }
 
@@ -207,126 +192,115 @@ class _OrderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(order.status);
     final timeStr = DateFormat('h:mm a').format(order.timestamp);
+
+    // Calculate order progress
+    final totalItems = order.items.length;
+    final readyItems =
+        order.items.where((i) => i.itemStatus == ItemStatus.ready).length;
+    final progress = totalItems > 0 ? readyItems / totalItems : 0.0;
 
     return Container(
       margin: const EdgeInsets.all(10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: statusColor.withAlpha(30),
+        color: Colors.white.withAlpha(10),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: statusColor.withAlpha(100)),
+        border: Border.all(color: Colors.white24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Order header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      order.status.name.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Order @ $timeStr',
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-              _buildStatusButton(context),
+              Text('Order @ $timeStr',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              Text('$readyItems / $totalItems ready',
+                  style: TextStyle(
+                      color: progress == 1 ? Colors.green : Colors.orange)),
             ],
           ),
+          const SizedBox(height: 8),
+
+          // Progress bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.white24,
+              valueColor: AlwaysStoppedAnimation(
+                  progress == 1 ? Colors.green : Colors.orange),
+              minHeight: 6,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Items with individual status controls
+          ...order.items.map((item) => _ItemRowWithControls(
+                item: item,
+                orderId: order.id,
+                provider: provider,
+              )),
+
           const SizedBox(height: 10),
 
-          // Items list with individual controls
-          ...order.items.map((item) => _ItemRow(item: item)),
+          // Mark all ready / served button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (order.allItemsReady && order.status != OrderStatus.ready)
+                ElevatedButton.icon(
+                  onPressed: () =>
+                      provider.updateOrderStatus(order.id, OrderStatus.ready),
+                  icon: const Icon(Icons.check_circle, size: 18),
+                  label: const Text('Order Ready'),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                ),
+              if (order.status == OrderStatus.ready)
+                ElevatedButton.icon(
+                  onPressed: () =>
+                      provider.updateOrderStatus(order.id, OrderStatus.served),
+                  icon: const Icon(Icons.delivery_dining, size: 18),
+                  label: const Text('Served'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                ),
+            ],
+          ),
         ],
       ),
     );
   }
-
-  Widget _buildStatusButton(BuildContext context) {
-    String buttonText;
-    Color buttonColor;
-    OrderStatus? nextStatus;
-
-    switch (order.status) {
-      case OrderStatus.pending:
-        buttonText = 'Start Cooking';
-        buttonColor = Colors.orange;
-        nextStatus = OrderStatus.cooking;
-        break;
-      case OrderStatus.cooking:
-        buttonText = 'Mark Ready';
-        buttonColor = Colors.green;
-        nextStatus = OrderStatus.ready;
-        break;
-      case OrderStatus.ready:
-        buttonText = 'Served';
-        buttonColor = Colors.blue;
-        nextStatus = OrderStatus.served;
-        break;
-      default:
-        buttonText = 'Done';
-        buttonColor = Colors.grey;
-        nextStatus = null;
-    }
-
-    return ElevatedButton(
-      onPressed: nextStatus != null
-          ? () => provider.updateOrderStatus(order.id, nextStatus!)
-          : null,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: buttonColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-      child: Text(buttonText),
-    );
-  }
-
-  Color _getStatusColor(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.pending:
-        return Colors.red;
-      case OrderStatus.cooking:
-        return Colors.orange;
-      case OrderStatus.ready:
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
 }
 
-class _ItemRow extends StatelessWidget {
+class _ItemRowWithControls extends StatelessWidget {
   final OrderItem item;
+  final String orderId;
+  final AppProvider provider;
 
-  const _ItemRow({required this.item});
+  const _ItemRowWithControls({
+    required this.item,
+    required this.orderId,
+    required this.provider,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    final statusColor = _getStatusColor(item.itemStatus);
+    final statusIcon = _getStatusIcon(item.itemStatus);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: statusColor.withAlpha(30),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: statusColor.withAlpha(100)),
+      ),
       child: Row(
         children: [
+          // Quantity badge
           Container(
             width: 32,
             height: 32,
@@ -335,42 +309,99 @@ class _ItemRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
-              child: Text(
-                '${item.quantity}x',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: Text('${item.quantity}x',
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(width: 12),
+
+          // Item name and remarks
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.menuItem.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text(item.menuItem.name,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500)),
                 if (item.remarks.isNotEmpty)
-                  Text(
-                    '📝 ${item.remarks}',
-                    style: TextStyle(
-                      color: Colors.yellow.shade300,
-                      fontSize: 13,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
+                  Text('📝 ${item.remarks}',
+                      style: TextStyle(
+                          color: Colors.yellow.shade300, fontSize: 12)),
               ],
             ),
           ),
+
+          // Status indicator
+          Icon(statusIcon, color: statusColor, size: 24),
+          const SizedBox(width: 8),
+
+          // Status control buttons
+          _buildStatusButton(),
         ],
       ),
     );
+  }
+
+  Widget _buildStatusButton() {
+    switch (item.itemStatus) {
+      case ItemStatus.pending:
+        return ElevatedButton(
+          onPressed: () =>
+              provider.updateItemStatus(orderId, item.id, ItemStatus.cooking),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          child: const Text('Cook', style: TextStyle(fontSize: 12)),
+        );
+      case ItemStatus.cooking:
+        return ElevatedButton(
+          onPressed: () =>
+              provider.updateItemStatus(orderId, item.id, ItemStatus.ready),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          child: const Text('Done', style: TextStyle(fontSize: 12)),
+        );
+      case ItemStatus.ready:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.green.withAlpha(50),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: const Text('✓ Ready',
+              style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12)),
+        );
+    }
+  }
+
+  Color _getStatusColor(ItemStatus status) {
+    switch (status) {
+      case ItemStatus.pending:
+        return Colors.red;
+      case ItemStatus.cooking:
+        return Colors.orange;
+      case ItemStatus.ready:
+        return Colors.green;
+    }
+  }
+
+  IconData _getStatusIcon(ItemStatus status) {
+    switch (status) {
+      case ItemStatus.pending:
+        return Icons.pending;
+      case ItemStatus.cooking:
+        return Icons.local_fire_department;
+      case ItemStatus.ready:
+        return Icons.check_circle;
+    }
   }
 }

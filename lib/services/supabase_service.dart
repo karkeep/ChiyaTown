@@ -23,11 +23,14 @@ class SupabaseService {
                 orElse: () => MenuData.items.first,
               );
               return OrderItem(
-                id: item[
-                    'instanceId'], // Unique ID for this specific item instance
+                id: item['instanceId'],
                 menuItem: menuItem,
                 quantity: item['quantity'],
                 remarks: item['remarks'] ?? '',
+                itemStatus: ItemStatus.values.firstWhere(
+                  (e) => e.name == (item['itemStatus'] ?? 'pending'),
+                  orElse: () => ItemStatus.pending,
+                ),
               );
             }).toList();
 
@@ -68,6 +71,7 @@ class SupabaseService {
               'menuId': item.menuItem.id,
               'quantity': item.quantity,
               'remarks': item.remarks,
+              'itemStatus': item.itemStatus.name,
             })
         .toList();
 
@@ -76,8 +80,8 @@ class SupabaseService {
       'id': order.id,
       'table_id': order.tableId,
       'status': order.status.name,
-      'timestamp': order.timestamp.toIso8601String(),
-      'items': itemsJson, // Storing complex structure as JSONB
+      'timestamp': order.timestamp.toUtc().toIso8601String(),
+      'items': itemsJson,
       'total_amount': order.totalAmount,
     });
 
@@ -93,8 +97,29 @@ class SupabaseService {
         .update({'status': status.name}).eq('id', orderId);
   }
 
+  // Update individual item status within an order
+  Future<void> updateItemStatus(
+      String orderId, String itemId, ItemStatus status) async {
+    // 1. Get current order
+    final response =
+        await _client.from('orders').select('items').eq('id', orderId).single();
+
+    // 2. Update the specific item's status
+    final List<dynamic> items = response['items'] ?? [];
+    final updatedItems = items.map((item) {
+      if (item['instanceId'] == itemId) {
+        return {...item, 'itemStatus': status.name};
+      }
+      return item;
+    }).toList();
+
+    // 3. Save back to database
+    await _client
+        .from('orders')
+        .update({'items': updatedItems}).eq('id', orderId);
+  }
+
   Future<void> freeTable(String tableId) async {
-    // Mark table free
     await _client
         .from('tables')
         .update({'is_occupied': false}).eq('id', tableId);

@@ -21,7 +21,7 @@ class AppProvider with ChangeNotifier {
       _allOrders = orders;
       notifyListeners();
     });
-    
+
     _service.tablesStream.listen((tables) {
       _allTables = tables;
       notifyListeners();
@@ -74,6 +74,10 @@ class AppProvider with ChangeNotifier {
     _service.updateOrderStatus(orderId, status);
   }
 
+  void updateItemStatus(String orderId, String itemId, ItemStatus status) {
+    _service.updateItemStatus(orderId, itemId, status);
+  }
+
   void markTableFree(String tableId) {
     _service.freeTable(tableId);
   }
@@ -81,7 +85,10 @@ class AppProvider with ChangeNotifier {
   // Helper for sales
   double getTotalSales(DateTime start, DateTime end) {
     return _allOrders
-        .where((o) => o.timestamp.isAfter(start) && o.timestamp.isBefore(end) && o.status == OrderStatus.paid)
+        .where((o) =>
+            o.timestamp.isAfter(start) &&
+            o.timestamp.isBefore(end) &&
+            o.status == OrderStatus.paid)
         .fold(0, (sum, o) => sum + o.totalAmount);
   }
 }
