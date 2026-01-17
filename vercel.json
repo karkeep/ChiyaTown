@@ -1,7 +1,8 @@
 {
     "version": 2,
-    "buildCommand": null,
-    "outputDirectory": ".",
+    "buildCommand": "./build.sh",
+    "installCommand": "echo 'Skipping install - handled in build.sh'",
+    "outputDirectory": "build/web",
     "rewrites": [
         {
             "source": "/(.*)",
