@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'providers/app_provider.dart';
 import 'screens/home_screen.dart';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import 'screens/customer/customer_menu_screen.dart';
 
 Future<void> main() async {
