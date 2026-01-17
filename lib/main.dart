@@ -78,10 +78,15 @@ class AppEntryPoint extends StatefulWidget {
 }
 
 class _AppEntryPointState extends State<AppEntryPoint> {
+  bool _deepLinkHandled = false;
+
   @override
   void initState() {
     super.initState();
-    // Check for URL parameters (Web Support)
+    _handleDeepLink();
+  }
+
+  void _handleDeepLink() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final uri = Uri.base;
       final provider = Provider.of<AppProvider>(context, listen: false);
@@ -89,33 +94,73 @@ class _AppEntryPointState extends State<AppEntryPoint> {
       // Check if coming from customer QR code with table ID
       if (uri.queryParameters.containsKey('table')) {
         final tableId = uri.queryParameters['table'];
-        if (tableId != null) {
+        if (tableId != null && !_deepLinkHandled) {
           debugPrint('Deep Link detected for table: $tableId');
-          // Wait for tables to load then navigate
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (provider.allTables.any((t) => t.id == tableId)) {
-              provider.selectTable(tableId);
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const CustomerMenuScreen()),
-              );
-            } else {
-              // Table not found, go to customer landing
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                    builder: (_) => const CustomerLandingScreen()),
-              );
-            }
-          });
+          _waitForTablesAndNavigate(provider, tableId);
         }
       }
       // Check if customer mode (from QR code without table ID)
       else if (uri.queryParameters.containsKey('mode') &&
           uri.queryParameters['mode'] == 'customer') {
+        if (!_deepLinkHandled) {
+          _deepLinkHandled = true;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const CustomerLandingScreen()),
+          );
+        }
+      }
+    });
+  }
+
+  void _waitForTablesAndNavigate(AppProvider provider, String tableId) {
+    // If tables are already loaded
+    if (provider.allTables.isNotEmpty) {
+      _navigateToTable(provider, tableId);
+      return;
+    }
+
+    // Wait for tables to load (poll every 100ms, max 5 seconds)
+    int attempts = 0;
+    const maxAttempts = 50;
+
+    void checkAndNavigate() {
+      if (_deepLinkHandled) return;
+
+      if (provider.allTables.isNotEmpty) {
+        _navigateToTable(provider, tableId);
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        Future.delayed(const Duration(milliseconds: 100), checkAndNavigate);
+      } else {
+        // Timeout - go to customer landing instead
+        _deepLinkHandled = true;
+        debugPrint('Timeout waiting for tables, going to landing screen');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const CustomerLandingScreen()),
         );
       }
-    });
+    }
+
+    checkAndNavigate();
+  }
+
+  void _navigateToTable(AppProvider provider, String tableId) {
+    if (_deepLinkHandled) return;
+    _deepLinkHandled = true;
+
+    if (provider.allTables.any((t) => t.id == tableId)) {
+      provider.selectTable(tableId);
+      debugPrint('Navigating to menu for table: $tableId');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const CustomerMenuScreen()),
+      );
+    } else {
+      // Table not found, go to customer landing
+      debugPrint('Table $tableId not found, going to landing screen');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const CustomerLandingScreen()),
+      );
+    }
   }
 
   @override
