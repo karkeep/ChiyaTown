@@ -4,9 +4,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'providers/app_provider.dart';
 import 'screens/home_screen.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/customer/customer_menu_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // TODO: Replace with your actual Supabase URL and Anon Key
+  await Supabase.initialize(
+    url: 'YOUR_SUPABASE_URL',
+    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+  );
+
   runApp(const ChiyaTownApp());
 }
 

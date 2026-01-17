@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import '../models/order.dart';
 import '../models/menu_item.dart';
 import '../models/table_model.dart';
-import '../services/mock_database_service.dart';
+// import '../services/mock_database_service.dart';
+import '../services/supabase_service.dart';
 
 class AppProvider with ChangeNotifier {
-  final MockDatabaseService _service = MockDatabaseService();
+  // final MockDatabaseService _service = MockDatabaseService(); // OLD
+  final SupabaseService _service = SupabaseService(); // NEW
 
   List<Order> _allOrders = [];
   List<CafeTable> _allTables = [];
