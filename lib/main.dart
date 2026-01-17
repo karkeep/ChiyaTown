@@ -10,10 +10,13 @@ import 'screens/customer/customer_menu_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // TODO: Replace with your actual Supabase URL and Anon Key
+  // Use Environment Variables if available, otherwise fallback to hardcoded (for local dev)
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://wbyodrisfdnsczknuupz.supabase.co');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndieW9kcmlzZmRuc2N6a251dXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjA4MjEsImV4cCI6MjA4NDE5NjgyMX0.stZpO42GsZXCTjNAIy423mzOafrvqm15AtEzTWaBZ0Q');
+
   await Supabase.initialize(
-    url: 'https://wbyodrisfdnsczknuupz.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndieW9kcmlzZmRuc2N6a251dXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjA4MjEsImV4cCI6MjA4NDE5NjgyMX0.stZpO42GsZXCTjNAIy423mzOafrvqm15AtEzTWaBZ0Q',
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
 
   runApp(const ChiyaTownApp());
