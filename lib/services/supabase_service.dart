@@ -100,23 +100,40 @@ class SupabaseService {
   // Update individual item status within an order
   Future<void> updateItemStatus(
       String orderId, String itemId, ItemStatus status) async {
-    // 1. Get current order
-    final response =
-        await _client.from('orders').select('items').eq('id', orderId).single();
+    try {
+      // 1. Get current order
+      final response = await _client
+          .from('orders')
+          .select('items')
+          .eq('id', orderId)
+          .single();
 
-    // 2. Update the specific item's status
-    final List<dynamic> items = response['items'] ?? [];
-    final updatedItems = items.map((item) {
-      if (item['instanceId'] == itemId) {
-        return {...item, 'itemStatus': status.name};
+      // 2. Update the specific item's status
+      final List<dynamic> items = response['items'] ?? [];
+      bool found = false;
+      final updatedItems = items.map((item) {
+        if (item['instanceId'] == itemId) {
+          found = true;
+          return {...item, 'itemStatus': status.name};
+        }
+        return item;
+      }).toList();
+
+      if (!found) {
+        // Debug: item not found - log it
+        print('Item $itemId not found in order $orderId');
+        return;
       }
-      return item;
-    }).toList();
 
-    // 3. Save back to database
-    await _client
-        .from('orders')
-        .update({'items': updatedItems}).eq('id', orderId);
+      // 3. Save back to database
+      await _client
+          .from('orders')
+          .update({'items': updatedItems}).eq('id', orderId);
+
+      print('Updated item $itemId to status ${status.name}');
+    } catch (e) {
+      print('Error updating item status: $e');
+    }
   }
 
   Future<void> freeTable(String tableId) async {
