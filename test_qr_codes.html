@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiya Town - Web QR Codes</title>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #121212;
+            color: white;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #E50914;
+        }
+
+        .setup-box {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: inline-block;
+            text-align: left;
+        }
+
+        input {
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+            width: 300px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #E50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            color: black;
+        }
+
+        img {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+    <script>
+        function updateQRs() {
+            const baseUrl = document.getElementById('urlInput').value;
+            // Remove trailing slash if present
+            const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+            for (let i = 1; i <= 10; i++) {
+                const tableId = 't' + i;
+                const fullUrl = `${cleanUrl}/?table=${tableId}`;
+                const qrImg = document.getElementById('qr-' + i);
+                const link = document.getElementById('link-' + i);
+
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}`;
+                link.href = fullUrl;
+                link.innerText = "Link for Table " + i;
+            }
+        }
+    </script>
+</head>
+
+<body onload="updateQRs()">
+    <h1>☕ Chiya Town Web QR Generator</h1>
+
+    <div class="setup-box">
+        <p><strong>Step 1:</strong> Start your app with <code>flutter run -d chrome --web-port=8080</code></p>
+        <p><strong>Step 2:</strong> Enter that URL below (e.g. http://localhost:8080):</p>
+        <input type="text" id="urlInput" value="http://localhost:8080" placeholder="Enter App URL">
+        <button onclick="updateQRs()">Update QRs</button>
+    </div>
+
+    <div class="grid">
+        <!-- Generates 10 cards -->
+        <script>
+            for (let i = 1; i <= 10; i++) {
+                document.write(`
+                    <div class="card">
+                        <img id="qr-${i}" src="" alt="QR">
+                        <div class="label">Table ${i}</div>
+                        <a id="link-${i}" href="#" target="_blank" style="font-size:0.8em; color:blue;">Open Link</a>
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+</body>
+
+</html>
